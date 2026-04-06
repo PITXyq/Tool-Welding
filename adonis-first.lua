@@ -3,12 +3,10 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries
 wait(2)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 wait(0.2)
-
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-
 -- IMPORTANT: This must run as a LocalScript on the client.
 local player = Players.LocalPlayer
 if not player then
@@ -18,11 +16,9 @@ end
 local char = player.Character or player.CharacterAdded:Wait()
 local playerGui = player:WaitForChild("PlayerGui")
 local camera = workspace.CurrentCamera
-
 -- Per-instance data
 local originalGrips = {} -- toolInstance -> CFrame
 local offsets = {} -- toolInstance -> CFrame (live edits)
-
 -- Serialize CFrame to table for persistence (pos + full matrix for exactness)
 local function serializeCFrame(cf)
     local pos = cf.Position
@@ -35,7 +31,6 @@ end
 local function deserializeCFrame(tbl)
     return CFrame.new(tbl.posX, tbl.posY, tbl.posZ, tbl.r00, tbl.r01, tbl.r02, tbl.r10, tbl.r11, tbl.r12, tbl.r20, tbl.r21, tbl.r22)
 end
-
 local persistentOffsets = {
     ["[AUG]"] = serializeCFrame(CFrame.new(-2.5, 0.5, -1.5)),
     ["[Flintlock]"] = serializeCFrame(CFrame.new(0.0833667815, 3.03116846, -1.90)),
@@ -48,7 +43,6 @@ local persistentOffsets = {
                    r10 = -0.351374835, r11 = 0.936234891, r12 = 0,
                    r20 = -4.09241281e-08, r21 = -1.53590811e-08, r22 = 1},
 }
-
 -- State
 local currentTool = nil
 local selectedTool = nil
@@ -74,14 +68,12 @@ local targetMode = "Normal" -- New: Normal or Align
 local noAnimsEnabled = false
 local noAnimsConn = nil
 local targetOffsetFrame = nil
-
 -- UI helpers
 local posAxes = {"X","Y","Z"}
 local rotAxes = {"Pitch","Yaw","Roll"} -- Rotation axes (degrees)
 local sliders = {}
 local valueLabels = {}
 local toolNameLabel
-
 -- Da Hood detection & slots (updated to CFrames)
 local DAHOOD_PATTERNS = {"aug","rifle","ak","m4","scar","shotgun","sniper","bolt","pistol","deagle","revolver","smg","lmg","flintlock","boombox"}
 local DAHOOD_SLOTS = {
@@ -91,7 +83,6 @@ local DAHOOD_SLOTS = {
     right = serializeCFrame(CFrame.new(3.5, 0.5, -1.5)),
     shoulder = serializeCFrame(CFrame.new(0.8,1.6,-1.2)),
 }
-
 local function isDaHoodWeapon(tool)
     if not tool or not tool:IsA("Tool") then return false end
     local name = tool.Name:lower()
@@ -100,7 +91,6 @@ local function isDaHoodWeapon(tool)
     end
     return false
 end
-
 local function getEquippedTool()
     if char then
         for _, child in ipairs(char:GetChildren()) do
@@ -111,25 +101,22 @@ local function getEquippedTool()
     end
     return nil
 end
-
 local function getActiveTool()
     if selectedTool and selectedTool.Parent then
         return selectedTool
     end
     return currentTool
 end
-
 local function ensureOriginalGrip(tool)
     if not tool then return end
     if not originalGrips[tool] then
         originalGrips[tool] = tool.Grip or CFrame.new()
     end
 end
-
 -- FIXED BOOMBOX — NO MORE HARD OVERRIDE
 local function applyOffset(tool)
     if not tool then return end
-    
+   
     -- COLOR FIX ONLY (stops weird tinting/glitching when deep behind body)
     if tool.Name == "Boombox" then
         local handle = tool:FindFirstChild("Handle")
@@ -143,7 +130,7 @@ local function applyOffset(tool)
             end
         end
     end
-    
+   
     -- NORMAL OFFSET LOGIC (Boombox now fully works with sliders + persistent)
     ensureOriginalGrip(tool)
     local offset = offsets[tool]
@@ -157,7 +144,6 @@ local function applyOffset(tool)
     local base = originalGrips[tool] or CFrame.new()
     tool.Grip = base * offset
 end
-
 local function applyPersistentToToolIfNeeded(tool)
     if not tool or not tool:IsA("Tool") then return end
     if keepAfterSpawn and persistentOffsets[tool.Name] then
@@ -166,7 +152,6 @@ local function applyPersistentToToolIfNeeded(tool)
         applyOffset(tool)
     end
 end
-
 -- Helper: get a reliable root part for character (PrimaryPart preferred, then HumanoidRootPart, then Torso)
 local function getCharacterRoot(c)
     if not c then return nil end
@@ -176,7 +161,6 @@ local function getCharacterRoot(c)
     local torso = c:FindFirstChild("Torso") or c:FindFirstChild("UpperTorso") or c:FindFirstChild("LowerTorso")
     return torso
 end
-
 -- UI: main screen + selector (height increased for rotation sliders and orbit edits)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ToolAdjusterUI"
@@ -222,7 +206,6 @@ toolNameLabel.TextColor3 = Color3.fromRGB(200,200,200)
 toolNameLabel.Font = Enum.Font.SourceSans
 toolNameLabel.TextSize = 14
 toolNameLabel.Parent = frame
-
 -- Sliders for Position X,Y,Z and Rotation Pitch,Yaw,Roll
 local allAxes = {posAxes, rotAxes}
 local axisTypes = {"Position", "Rotation"}
@@ -326,7 +309,6 @@ for t, axes in ipairs(allAxes) do
         sliderButton.Position = UDim2.new(0.5 - 0.025,0,0,0)
     end
 end
-
 -- Orbit editable parameters: Speed and Radius Multiplier sliders
 local orbitParams = {"Speed", "Radius"}
 local orbitSectionLabel = Instance.new("TextLabel")
@@ -404,7 +386,6 @@ for i, param in ipairs(orbitParams) do
     local initialRel = (param == "Speed" and (orbitSpeed - minVal) or (orbitRadiusMultiplier - minVal)) / (maxVal - minVal)
     sliderButton.Position = UDim2.new(initialRel - 0.025,0,0,0)
 end
-
 -- Reset button
 local resetButton = Instance.new("TextButton")
 resetButton.Size = UDim2.new(1,0,0,30)
@@ -433,7 +414,6 @@ resetButton.MouseButton1Click:Connect(function()
         sliders[axis].button.Position = UDim2.new(0.475,0,0,0)
     end
 end)
-
 -- Tool selector panel (right side)
 local SELECTOR_W, SELECTOR_H = 300, 700 -- Match new height
 local selectorFrame = Instance.new("Frame")
@@ -506,7 +486,6 @@ function refreshToolList()
         selectedTool = nil
     end
 end
-
 -- Equip / Unequip all
 local equipAllButton = Instance.new("TextButton")
 equipAllButton.Size = UDim2.new(0.48,0,0,28)
@@ -546,7 +525,6 @@ unequipAllButton.MouseButton1Click:Connect(function()
     end
     refreshToolList()
 end)
-
 -- Toggle selector panel
 local toggleSelectorButton = Instance.new("TextButton")
 toggleSelectorButton.Size = UDim2.new(0,110,0,26)
@@ -567,7 +545,6 @@ toggleSelectorButton.MouseButton1Click:Connect(function()
         refreshToolList()
     end
 end)
-
 -- Keep After Spawn toggle
 local keepButton = Instance.new("TextButton")
 keepButton.Size = UDim2.new(0,120,0,26)
@@ -617,7 +594,6 @@ keepButton.MouseButton1Click:Connect(function()
         toolNameLabel.Text = "Current Tool: None"
     end
 end)
-
 -- Da Hood toggle + range button
 local daHoodButton = Instance.new("TextButton")
 daHoodButton.Size = UDim2.new(0,130,0,26)
@@ -647,7 +623,6 @@ rangeButton.MouseButton1Click:Connect(function()
         rangeButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
     end
 end)
-
 local function assignDaHoodLayout()
     if not keepAfterSpawn then
         keepAfterSpawn = true
@@ -720,7 +695,6 @@ local function assignDaHoodLayout()
     end
     refreshToolList()
 end
-
 daHoodButton.MouseButton1Click:Connect(function()
     daHoodEnabled = not daHoodEnabled
     daHoodButton.Text = "Da Hood Mode: " .. (daHoodEnabled and "On" or "Off")
@@ -746,7 +720,6 @@ daHoodButton.MouseButton1Click:Connect(function()
         refreshToolList()
     end
 end)
-
 local function equipAllDHWeapons()
     if not char then return end
     for _, tool in ipairs(player.Backpack:GetChildren()) do
@@ -761,7 +734,6 @@ local function equipAllDHWeapons()
     end
     refreshToolList()
 end
-
 -- New helper: equip the Double-Barrel specifically
 local function equipDoubleBarrel()
     if not char then return end
@@ -778,7 +750,6 @@ local function equipDoubleBarrel()
     end
     refreshToolList()
 end
-
 UIS.InputBegan:Connect(function(input, processed)
     if processed then return end
     if input.UserInputType == Enum.UserInputType.Keyboard then
@@ -791,7 +762,6 @@ UIS.InputBegan:Connect(function(input, processed)
         end
     end
 end)
-
 -- Monitor equipped tool changes
 RunService.Heartbeat:Connect(function()
     local tool = getEquippedTool()
@@ -814,7 +784,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-
 player.Backpack.ChildAdded:Connect(function(child)
     if child:IsA("Tool") then
         if daHoodEnabled then
@@ -825,7 +794,6 @@ player.Backpack.ChildAdded:Connect(function(child)
         end
     end
 end)
-
 player.Backpack.ChildRemoved:Connect(function()
     if daHoodEnabled then
         assignDaHoodLayout()
@@ -833,7 +801,6 @@ player.Backpack.ChildRemoved:Connect(function()
         refreshToolList()
     end
 end)
-
 local originalAnimate = char:WaitForChild("Animate"):Clone()
 local multiEquippedNames = {} -- Persist multi-equip names for respawn
 local multiTools = {}
@@ -842,7 +809,6 @@ local holdingF1 = false
 local multiEquipChildAdded = nil
 local multiEquipChildRemoved = nil
 local multiEquipBackpackAdded = nil
-
 -- Multi-equip setup function (called on every spawn so it ALWAYS works)
 local function setupMultiEquipConnections(newChar)
     if multiEquipChildAdded then multiEquipChildAdded:Disconnect() end
@@ -891,7 +857,6 @@ local function setupMultiEquipConnections(newChar)
         end
     end)
 end
-
 local function onCharacterAdded(newChar)
     char = newChar
     currentTool = nil
@@ -957,16 +922,13 @@ local function onCharacterAdded(newChar)
     end
     setupMultiEquipConnections(newChar)
 end
-
 player.CharacterAdded:Connect(onCharacterAdded)
 if player.Character then onCharacterAdded(player.Character) end
-
 -- initial refresh & open animation
 refreshToolList()
 frame.Position = UDim2.new(1, 0, 0.5, -350)
 local tween = TweenService:Create(frame, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(1, -310, 0.5, -350)})
 tween:Play()
-
 -- -------------------------
 -- TARGETING MODE: additions + X/Z inversion fix (position only; rotation manual)
 -- -------------------------
@@ -974,7 +936,6 @@ local targeting = false
 local lockedTargetPlayer = nil
 local lockedTargetHead = nil
 local mouse = player:GetMouse()
-
 -- Target Button (placed in the main frame)
 local targetButton = Instance.new("TextButton")
 targetButton.Size = UDim2.new(0, 110, 0, 26)
@@ -985,7 +946,6 @@ targetButton.TextColor3 = Color3.fromRGB(255,255,255)
 targetButton.Font = Enum.Font.SourceSans
 targetButton.TextSize = 12
 targetButton.Parent = frame
-
 -- Rapid Equip Button (adjusted position for taller UI)
 local rapidEquipButton = Instance.new("TextButton")
 rapidEquipButton.Size = UDim2.new(0, 110, 0, 26)
@@ -1000,7 +960,6 @@ rapidEquipButton.MouseButton1Click:Connect(function()
     rapidEquipEnabled = not rapidEquipEnabled
     rapidEquipButton.Text = "Rapid Equip: " .. (rapidEquipEnabled and "On" or "Off")
 end)
-
 -- NEW: Rapid Equip Mode Button (little button to cycle speeds)
 local rapidEquipModeButton = Instance.new("TextButton")
 rapidEquipModeButton.Size = UDim2.new(0, 110, 0, 26)
@@ -1023,7 +982,6 @@ rapidEquipModeButton.MouseButton1Click:Connect(function()
         rapidEquipDelay = 0.1
     end
 end)
-
 -- NEW: Fix Tools Button (resets rapid/orbit bugs without resetting character)
 local fixToolsButton = Instance.new("TextButton")
 fixToolsButton.Size = UDim2.new(0, 220, 0, 30)
@@ -1067,7 +1025,6 @@ fixToolsButton.MouseButton1Click:Connect(function()
     refreshToolList()
     print("Tools fixed — rapid/orbit disabled, grips refreshed.")
 end)
-
 -- Rapid equip loop (uses variable delay, works with orbit)
 spawn(function()
     while true do
@@ -1080,7 +1037,6 @@ spawn(function()
         task.wait(rapidEquipDelay)
     end
 end)
-
 -- Bottom-left temporary message UI (hidden until used)
 local msgGui = Instance.new("ScreenGui")
 msgGui.Name = "TargetMessageGui"
@@ -1120,7 +1076,6 @@ subLabel.TextSize = 14
 subLabel.Text = "Target locked"
 subLabel.TextXAlignment = Enum.TextXAlignment.Left
 subLabel.Parent = msgFrame
-
 local function showTargetMessage(targetPlayer)
     if not targetPlayer then return end
     local ok, thumbUrl = pcall(function()
@@ -1144,7 +1099,6 @@ local function showTargetMessage(targetPlayer)
         msgFrame.Visible = false
     end)
 end
-
 -- Find the player whose head is nearest to mouse pointer (in 2D screen distance)
 local function findNearestPlayerToMouse(mx, my)
     local best, bestDist = nil, math.huge
@@ -1162,7 +1116,6 @@ local function findNearestPlayerToMouse(mx, my)
     end
     return best
 end
-
 -- Activate targeting mode: wait for next left click and select nearest player head
 local function startTargetingMode()
     if targeting then return end
@@ -1191,7 +1144,6 @@ local function startTargetingMode()
         end
     end)
 end
-
 -- Target button toggles/clears lock
 targetButton.MouseButton1Click:Connect(function()
     if targeting then return end
@@ -1205,7 +1157,6 @@ targetButton.MouseButton1Click:Connect(function()
         startTargetingMode()
     end
 end)
-
 -- Silent Aim Setup
 local SilentAim = {
     Enabled = true,
@@ -1217,7 +1168,6 @@ local SilentAim = {
 local function CalculateChance(Percentage)
     return math.random(1, 100) <= Percentage
 end
-
 spawn(function()
     while SilentAim.AutoPrediction do
         task.wait(0.05)
@@ -1249,7 +1199,6 @@ spawn(function()
         end
     end
 end)
-
 if not getgenv().DaHoodSilentAim then
     getgenv().DaHoodSilentAim = true
     local oldIndex = nil
@@ -1279,7 +1228,6 @@ if not getgenv().DaHoodSilentAim then
         return oldIndex(self, index)
     end)
 end
-
 -- Orbit feature (reworked for FE-friendly: client-side visual only, smoother positions)
 local orbitModes = {"Horizontal", "VerticalFront", "VerticalSide", "Sphere", "Helix", "Chaotic"}
 local currentOrbitModeIndex = 1
@@ -1306,7 +1254,6 @@ modeButton.MouseButton1Click:Connect(function()
     orbitMode = orbitModes[currentOrbitModeIndex]
     modeButton.Text = "Orbit Mode: " .. orbitMode
 end)
-
 local function getSpherePositions(n, r)
     local positions = {}
     local inc = math.pi * (3 - math.sqrt(5))
@@ -1321,7 +1268,6 @@ local function getSpherePositions(n, r)
     end
     return positions
 end
-
 local handles = {}
 local orbitParts = {}
 local movers = {}
@@ -1337,7 +1283,6 @@ local targetHRP = char:WaitForChild("HumanoidRootPart")
 local tweenEnabled = false
 local tweenDelay = 0.5
 local lastTargetChange = os.clock()
-
 local function cleanupTool(h)
     local index = table.find(handles, h)
     if index then
@@ -1353,7 +1298,6 @@ local function cleanupTool(h)
         table.remove(toolNames, index)
     end
 end
-
 local function setupTool(v)
     if not v or not v:IsA("Tool") then return end
     local h = v:FindFirstChild("Handle")
@@ -1388,7 +1332,6 @@ local function setupTool(v)
     ap.Attachment1 = Instance.new("Attachment", p)
     movers[h] = {align = ap, angular = av}
 end
-
 local function handleCharacter(character)
     local function destroyGrip()
         for _, obj in ipairs(character:GetDescendants()) do
@@ -1404,24 +1347,19 @@ local function handleCharacter(character)
         end
     end)
 end
-
 if player.Character then
     handleCharacter(player.Character)
 end
-
 local SETTINGS = {
     VelocityY = 220.290009,
     SimulationRadius = 2147483647
 }
-
 local lastHRPPos = targetHRP.Position
 local hrpVel = Vector3.zero
-
 RunService.Stepped:Connect(function()
     settings().Physics.AllowSleep = false
     player.SimulationRadius = SETTINGS.SimulationRadius
 end)
-
 RunService.PostSimulation:Connect(function(dt)
     if not targetHRP or not targetHRP.Parent then return end
     local currentTime = os.clock()
@@ -1449,7 +1387,6 @@ RunService.PostSimulation:Connect(function(dt)
         end
     end
 end)
-
 local childAddedConn = nil
 orbitButton.MouseButton1Click:Connect(function()
     orbitEnabled = not orbitEnabled
@@ -1560,7 +1497,6 @@ orbitButton.MouseButton1Click:Connect(function()
         toolNames = {}
     end
 end)
-
 -- Little toggle button for UI
 local toggleUIButton = Instance.new("TextButton")
 toggleUIButton.Size = UDim2.new(0, 50, 0, 50)
@@ -1575,12 +1511,9 @@ toggleUIButton.MouseButton1Click:Connect(function()
     frame.Visible = not frame.Visible
     selectorFrame.Visible = frame.Visible and toggleSelectorButton.Text == "Hide Selector"
 end)
-
 print("Tool adjuster loaded. Added 'Fix Tools' button to reset rapid/orbit bugs without resetting character.")
-
 -- TARGETING FIXES
 local originalRightGripC1 = nil
-
 -- UPDATED: head snap with LIVE offset (still butter smooth)
 RunService.Heartbeat:Connect(function()
     local rightGrip = char and char:FindFirstChild("RightGrip", true)
@@ -1610,7 +1543,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-
 -- Silent Aim (always enabled when locked)
 local SilentAim = {
     Enabled = true,
@@ -1619,11 +1551,9 @@ local SilentAim = {
     HitChance = 100,
     AutoPrediction = true
 }
-
 local function CalculateChance(Percentage)
     return math.random(1, 100) <= Percentage
 end
-
 spawn(function()
     while SilentAim.AutoPrediction do
         task.wait(0.05)
@@ -1643,7 +1573,6 @@ spawn(function()
         end
     end
 end)
-
 if not getgenv().DaHoodSilentAim then
     getgenv().DaHoodSilentAim = true
     local oldIndex = nil
@@ -1670,7 +1599,6 @@ if not getgenv().DaHoodSilentAim then
         return oldIndex(self, index)
     end)
 end
-
 -- NEW: Under feature integration
 local underEnabled = false
 local underConnection = nil
@@ -1678,7 +1606,6 @@ local noclipConnection = nil
 local originalCollides = {}
 local originalHumanoidState = nil
 local savedPosition = nil
-
 -- Function to enable/disable full noclip
 local function setNoClip(enable)
     local localChar = player.Character
@@ -1721,7 +1648,6 @@ local function setNoClip(enable)
         end
     end
 end
-
 -- Under button (appears when target is locked)
 local underButton = Instance.new("TextButton")
 underButton.Size = UDim2.new(0, 110, 0, 26)
@@ -1777,7 +1703,6 @@ underButton.MouseButton1Click:Connect(function()
         setNoClip(false)
     end
 end)
-
 -- === TARGET OFFSET ADJUSTER UI (pops when you lock target) ===
 local targetOffsetGui = Instance.new("ScreenGui")
 targetOffsetGui.Name = "TargetOffsetUI"
@@ -1867,7 +1792,6 @@ end
 makeSlider("X", 70, Color3.fromRGB(255,80,80))
 makeSlider("Y", 135, Color3.fromRGB(80,255,80))
 makeSlider("Z", 200, Color3.fromRGB(80,80,255))
-
 -- NEW: Mode switch button
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(0.9,0,0,36)
@@ -1882,7 +1806,6 @@ modeBtn.MouseButton1Click:Connect(function()
     targetMode = targetMode == "Normal" and "Align" or "Normal"
     modeBtn.Text = "Mode: " .. targetMode
 end)
-
 -- NEW: No Anims button
 local noAnimsBtn = Instance.new("TextButton")
 noAnimsBtn.Size = UDim2.new(0.9,0,0,36)
@@ -1893,7 +1816,6 @@ noAnimsBtn.TextColor3 = Color3.new(1,1,1)
 noAnimsBtn.Font = Enum.Font.GothamBold
 noAnimsBtn.TextSize = 15
 noAnimsBtn.Parent = targetOffsetFrame
-
 -- === AUTO NO ANIMS ON TARGET (exactly what you wanted) ===
 local function enableNoAnims()
     noAnimsEnabled = true
@@ -1927,7 +1849,6 @@ local function disableNoAnims()
         originalAnimate:Clone().Parent = char
     end
 end
-
 -- manual button still works
 noAnimsBtn.MouseButton1Click:Connect(function()
     if noAnimsEnabled then
@@ -1936,7 +1857,6 @@ noAnimsBtn.MouseButton1Click:Connect(function()
         enableNoAnims()
     end
 end)
-
 -- AUTO MAGIC: enables when you target, disables when you untarget
 local lastTargetState = false
 RunService.Heartbeat:Connect(function()
@@ -1950,7 +1870,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-
 -- reset
 local resetBtn = Instance.new("TextButton")
 resetBtn.Size = UDim2.new(0.9,0,0,36)
@@ -1969,7 +1888,6 @@ resetBtn.MouseButton1Click:Connect(function()
     end
 end)
 targetOffsetFrame.Visible = false
-
 -- F1 hold for multi-equip (now fully respawn-proof)
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -1990,3 +1908,27 @@ UIS.InputEnded:Connect(function(input)
         holdingF1 = false
     end
 end)
+
+-- === BOOMBOX FORCE FIX (this is what actually makes it work) ===
+local boomboxForceConn = RunService.Heartbeat:Connect(function()
+    if not char then return end
+    
+    local boombox = char:FindFirstChild("Boombox")
+    if boombox then
+        ensureOriginalGrip(boombox)
+        
+        local offset = offsets[boombox]
+        if not offset and keepAfterSpawn then
+            local pers = persistentOffsets["Boombox"]
+            if pers then
+                offset = deserializeCFrame(pers)
+            end
+        end
+        offset = offset or CFrame.new()
+        
+        local base = originalGrips[boombox] or CFrame.new()
+        boombox.Grip = base * offset   -- FORCE EVERY FRAME
+    end
+end)
+
+print("✅ EVERYTHING LOADED (supposingly)")
