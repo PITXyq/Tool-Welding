@@ -1909,26 +1909,43 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- === BOOMBOX FORCE FIX (this is what actually makes it work) ===
-local boomboxForceConn = RunService.Heartbeat:Connect(function()
+-- === ULTRA BOOMBOX FIX (RenderStepped + DESTROY RightGrip every frame) ===
+local boomboxRenderConn = RunService.RenderStepped:Connect(function()
     if not char then return end
-    
     local boombox = char:FindFirstChild("Boombox")
-    if boombox then
-        ensureOriginalGrip(boombox)
-        
-        local offset = offsets[boombox]
-        if not offset and keepAfterSpawn then
-            local pers = persistentOffsets["Boombox"]
-            if pers then
-                offset = deserializeCFrame(pers)
+    if not boombox then return end
+
+    -- DESTROY any RightGrip that Roblox tries to make (this is the key)
+    local rightGrip = char:FindFirstChild("RightGrip")
+    if rightGrip then
+        rightGrip:Destroy()
+    end
+
+    ensureOriginalGrip(boombox)
+    local offset = offsets[boombox]
+    if not offset and keepAfterSpawn then
+        local pers = persistentOffsets["Boombox"]
+        if pers then
+            offset = deserializeCFrame(pers)
+        end
+    end
+    offset = offset or CFrame.new()
+    local base = originalGrips[boombox] or CFrame.new()
+
+    -- FORCE the grip every single RenderStepped frame
+    boombox.Grip = base * offset
+
+    -- Extra color fix + make sure handle is visible
+    local handle = boombox:FindFirstChild("Handle")
+    if handle then
+        for _, part in ipairs(boombox:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Material = Enum.Material.Plastic
+                part.Color = Color3.fromRGB(163, 162, 165)
+                part.Transparency = 0
             end
         end
-        offset = offset or CFrame.new()
-        
-        local base = originalGrips[boombox] or CFrame.new()
-        boombox.Grip = base * offset   -- FORCE EVERY FRAME
     end
 end)
 
-print("✅ EVERYTHING LOADED (supposingly)")
+print("✅ ULTRA BOOMBOX FIX LOADED - it will now actually move (RenderStepped + grip destruction)")
