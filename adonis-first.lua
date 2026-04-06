@@ -1,6 +1,6 @@
 wait(1.2)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua"))()
-wait(4)
+wait(10)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 wait(0.2)
 
