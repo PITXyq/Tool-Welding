@@ -1,6 +1,5 @@
-wait(1.2)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua"))()
-wait(2)
+wait(5)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 wait(0.2)
 local UIS = game:GetService("UserInputService")
