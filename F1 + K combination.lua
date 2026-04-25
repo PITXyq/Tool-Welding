@@ -1,14 +1,11 @@
--- 🔥 EXPERT ROBLOX CHEATER COMBO LOADER 🔥
 -- IY loads IMMEDIATELY on inject
 -- Weld/Tool Adjuster (full grip + UI + silent + orbit + under + everything) loads right after
 -- Adonis ONLY loads when you HOLD F1 + press K (anytime, one-time only)
--- After combo Adonis loads once → loader dies forever. No spam.
-
-print("🔥 EXPERT CHEATER: Loading Infinite Yield FIRST...")
+print("Loading Infinite Yield")
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 wait(2)
 
-print("🔥 Loading Weld/Tool Adjuster script now (full beast mode except Adonis)...")
+print("Loading Weld/Tool Adjuster script now")
 
 -- ─────────────────────────────────────────────────────────────
 -- FULL WELD/TOOL ADJUSTER SCRIPT (Adonis removed - only loads on combo)
