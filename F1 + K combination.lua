@@ -1,6 +1,3 @@
--- IY loads IMMEDIATELY on inject
--- Weld/Tool Adjuster (full grip + UI + silent + orbit + under + everything) loads right after
--- Adonis ONLY loads when you HOLD F1 + press K (anytime, one-time only)
 print("Loading Infinite Yield")
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 wait(2)
