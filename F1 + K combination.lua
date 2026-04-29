@@ -26,28 +26,15 @@ local playerGui = player:WaitForChild("PlayerGui")
 local camera = workspace.CurrentCamera
 -- Weapon grip map (Boombox locked Z=-2.65 + your exact rotation)
 local weaponGripMap = {
-    ["[AUG]"] = { 2.88670993, -1.15440118, 0.975286245,
-                  -0.892790675, -0.449979424, -0.021051202,
-                  -0.449911892, 0.893036127, -0.00810947269,
-                  0.0224485807, 0.00223112362, -0.999745488 },
-    ["[Flintlock]"] = { 0.0833667815, 3.03116846, -0.743065834,
-                        0.999956548, 0, 0.00932267774,
-                        0, 1, 0,
-                        -0.00932267774, 0, 0.999956548 },
-    ["[LMG]"] = { 0.992664754, -3.39214921, -1.16938221,
-                  0.893063903, 0.449861199, -0.00786215067,
-                  -0.449917108, 0.893033862, -0.00806869194,
-                  0.00339137577, 0.0107431728, 0.999936521 },
-    ["[Rifle]"] = { -3.97243452, -1.51637638, 0.427466333,
-                    -0.892001987, -0.449795008, -0.0449092388,
-                    -0.449909091, 0.893037558, -0.00810541213,
-                    0.0437514111, 0.0129750315, -0.99895823 },
-    ["[Double-Barrel SG]"] = {
-        4.88433647, 1.61962557, -1.04101145,
-        0.892001987, 0.449795008, 0.0449092388,
-        -0.449909091, 0.893037558, -0.00810541213,
-        -0.0437514111, -0.0129750315, 0.99895817
-    },
+    ["[AUG]"] = {2.07387996, 1.34745741, 0.972107768, -0.892790675, -0.449979424, -0.021051202, -0.449911892, 0.893036127, -0.00810947269, 0.0224485807, 0.00223112362, -0.999745488},
+    ["[Deagle]"] = {2.95100403, 1.48889732, 0.0876422524, 0.999956548, 0, 0.00932267774, 0, 1, 0, -0.00932267774, 0, 0.999956548},
+    ["[Double-Barrel SG]"] = {4.87040806, 0.629776001, -0.288636208, 0.892001987, 0.449795008, 0.0449092388, -0.449909091, 0.893037558, -0.00810541213, -0.0437514111, -0.0129750315, 0.99895817},
+    ["[Flintlock]"] = {-0.29586333, 1.48937821, -0.83953464, 0.999956548, 0, 0.00932267774, 0, 1, 0, -0.00932267774, 0, 0.999956548},
+    ["[LMG]"] = {-2.12617683, -0.632455111, -0.240959287, 0.893063903, 0.449861199, -0.00786215067, -0.449917108, 0.893033862, -0.00806869194, 0.00339137577, 0.0107431728, 0.999936521},
+    ["[Revolver]"] = {-1.21528339, -0.776254892, -2.42920375, -0.0286964178, -0.00544241071, 0.99957335, -0.449941665, 0.893021643, -0.00805497169, -0.892596841, -0.449980855, -0.0280753374},
+    ["[Rifle]"] = {-3.13991642, -1.32983017, 1.03399849, -0.892001987, -0.449795008, -0.0449092388, -0.449909091, 0.893037558, -0.00810541213, 0.0437514111, 0.0129750315, -0.99895823},
+    ["[Shotgun]"] = {-0.234426722, -3.9485147, 1.23447323, -0.892001987, -0.449795008, -0.0449092388, -0.449909091, 0.893037558, -0.00810541213, 0.0437514111, 0.0129750315, -0.99895823},
+    ["[TacticalShotgun]"] = {-3.43440294, -0.185738131, -0.78850174, 0.892001987, 0.449795008, 0.0449092388, -0.449909091, 0.893037558, -0.00810541213, -0.0437514111, -0.0129750315, 0.99895817},
     ["Boombox"] = {-1.47619057, -0.297619045, -2.65, -0.936234891, -0.351374835, -4.37113883e-08, -0.351374835, 0.936234891, 0, -4.09241281e-08, -1.53590811e-08, 1},
 }
 -- Per-instance data
@@ -66,16 +53,32 @@ local function deserializeCFrame(tbl)
     return CFrame.new(tbl.posX, tbl.posY, tbl.posZ, tbl.r00, tbl.r01, tbl.r02, tbl.r10, tbl.r11, tbl.r12, tbl.r20, tbl.r21, tbl.r22)
 end
 local persistentOffsets = {
-    ["[AUG]"] = serializeCFrame(CFrame.new(-2.5, 0.5, -1.5)),
-    ["[Flintlock]"] = serializeCFrame(CFrame.new(0.0833667815, 3.03116846, -1.90)),
-    ["[LMG]"] = serializeCFrame(CFrame.new(-0.15, -1.10, -1.16938221)),
-    ["[Rifle]"] = serializeCFrame(CFrame.new(3.5, 0.5, -1.5)),
-    ["[Revolver]"] = serializeCFrame(CFrame.new(2.5, 0.5, -1.7)),
-    ["[Double-Barrel SG]"] = serializeCFrame(CFrame.new(3.90, 2.90, -1.041011)),
+    ["[AUG]"] = {posX = 2.07387996, posY = 1.34745741, posZ = 0.972107768, r00 = -0.892790675, r01 = -0.449979424, r02 = -0.021051202, r10 = -0.449911892, r11 = 0.893036127, r12 = -0.00810947269, r20 = 0.0224485807, r21 = 0.00223112362, r22 = -0.999745488},
+    ["[Deagle]"] = {posX = 2.95100403, posY = 1.48889732, posZ = 0.0876422524, r00 = 0.999956548, r01 = 0, r02 = 0.00932267774, r10 = 0, r11 = 1, r12 = 0, r20 = -0.00932267774, r21 = 0, r22 = 0.999956548},
+    ["[Double-Barrel SG]"] = {posX = 4.87040806, posY = 0.629776001, posZ = -0.288636208, r00 = 0.892001987, r01 = 0.449795008, r02 = 0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = -0.0437514111, r21 = -0.0129750315, r22 = 0.99895817},
+    ["[Flintlock]"] = {posX = -0.29586333, posY = 1.48937821, posZ = -0.83953464, r00 = 0.999956548, r01 = 0, r02 = 0.00932267774, r10 = 0, r11 = 1, r12 = 0, r20 = -0.00932267774, r21 = 0, r22 = 0.999956548},
+    ["[LMG]"] = {posX = -2.12617683, posY = -0.632455111, posZ = -0.240959287, r00 = 0.893063903, r01 = 0.449861199, r02 = -0.00786215067, r10 = -0.449917108, r11 = 0.893033862, r12 = -0.00806869194, r20 = 0.00339137577, r21 = 0.0107431728, r22 = 0.999936521},
+    ["[Revolver]"] = {posX = -1.21528339, posY = -0.776254892, posZ = -2.42920375, r00 = -0.0286964178, r01 = -0.00544241071, r02 = 0.99957335, r10 = -0.449941665, r11 = 0.893021643, r12 = -0.00805497169, r20 = -0.892596841, r21 = -0.449980855, r22 = -0.0280753374},
+    ["[Rifle]"] = {posX = -3.13991642, posY = -1.32983017, posZ = 1.03399849, r00 = -0.892001987, r01 = -0.449795008, r02 = -0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = 0.0437514111, r21 = 0.0129750315, r22 = -0.99895823},
+    ["[Shotgun]"] = {posX = -0.234426722, posY = -3.9485147, posZ = 1.23447323, r00 = -0.892001987, r01 = -0.449795008, r02 = -0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = 0.0437514111, r21 = 0.0129750315, r22 = -0.99895823},
+    ["[TacticalShotgun]"] = {posX = -3.43440294, posY = -0.185738131, posZ = -0.78850174, r00 = 0.892001987, r01 = 0.449795008, r02 = 0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = -0.0437514111, r21 = -0.0129750315, r22 = 0.99895817},
     ["Boombox"] = {posX = -1.47619057, posY = -0.297619045, posZ = -2.65,
                    r00 = -0.936234891, r01 = -0.351374835, r02 = -4.37113883e-08,
                    r10 = -0.351374835, r11 = 0.936234891, r12 = 0,
                    r20 = -4.09241281e-08, r21 = -1.53590811e-08, r22 = 1},
+}
+
+-- Exact grip map from your provided holding positions (forces exact CFrame when not in Da Hood mode)
+local exactGripMap = {
+    ["[AUG]"] = CFrame.new(2.07387996, 1.34745741, 0.972107768, -0.892790675, -0.449979424, -0.021051202, -0.449911892, 0.893036127, -0.00810947269, 0.0224485807, 0.00223112362, -0.999745488),
+    ["[Deagle]"] = CFrame.new(2.95100403, 1.48889732, 0.0876422524, 0.999956548, 0, 0.00932267774, 0, 1, 0, -0.00932267774, 0, 0.999956548),
+    ["[Double-Barrel SG]"] = CFrame.new(4.87040806, 0.629776001, -0.288636208, 0.892001987, 0.449795008, 0.0449092388, -0.449909091, 0.893037558, -0.00810541213, -0.0437514111, -0.0129750315, 0.99895817),
+    ["[Flintlock]"] = CFrame.new(-0.29586333, 1.48937821, -0.83953464, 0.999956548, 0, 0.00932267774, 0, 1, 0, -0.00932267774, 0, 0.999956548),
+    ["[LMG]"] = CFrame.new(-2.12617683, -0.632455111, -0.240959287, 0.893063903, 0.449861199, -0.00786215067, -0.449917108, 0.893033862, -0.00806869194, 0.00339137577, 0.0107431728, 0.999936521),
+    ["[Revolver]"] = CFrame.new(-1.21528339, -0.776254892, -2.42920375, -0.0286964178, -0.00544241071, 0.99957335, -0.449941665, 0.893021643, -0.00805497169, -0.892596841, -0.449980855, -0.0280753374),
+    ["[Rifle]"] = CFrame.new(-3.13991642, -1.32983017, 1.03399849, -0.892001987, -0.449795008, -0.0449092388, -0.449909091, 0.893037558, -0.00810541213, 0.0437514111, 0.0129750315, -0.99895823),
+    ["[Shotgun]"] = CFrame.new(-0.234426722, -3.9485147, 1.23447323, -0.892001987, -0.449795008, -0.0449092388, -0.449909091, 0.893037558, -0.00810541213, 0.0437514111, 0.0129750315, -0.99895823),
+    ["[TacticalShotgun]"] = CFrame.new(-3.43440294, -0.185738131, -0.78850174, 0.892001987, 0.449795008, 0.0449092388, -0.449909091, 0.893037558, -0.00810541213, -0.0437514111, -0.0129750315, 0.99895817),
 }
 -- State
 local currentTool = nil
@@ -109,13 +112,17 @@ local sliders = {}
 local valueLabels = {}
 local toolNameLabel
 -- Da Hood detection & slots (updated to CFrames)
-local DAHOOD_PATTERNS = {"aug","rifle","ak","m4","scar","shotgun","sniper","bolt","pistol","deagle","revolver","smg","lmg","flintlock","boombox"}
+local DAHOOD_PATTERNS = {"aug","rifle","ak","m4","scar","shotgun","sniper","bolt","pistol","deagle","revolver","smg","lmg","flintlock","boombox","tacticalshotgun","double-barrel","tactical"}
 local DAHOOD_SLOTS = {
-    left = serializeCFrame(CFrame.new(-2.5, 0.5, -1.5)),
-    top = serializeCFrame(CFrame.new(-0.15, -1.10, -1.16938221)),
-    back = serializeCFrame(CFrame.new(0.0833667815, 3.03116846, -1.90)),
-    right = serializeCFrame(CFrame.new(3.5, 0.5, -1.5)),
-    shoulder = serializeCFrame(CFrame.new(0.8,1.6,-1.2)),
+    left = {posX = 2.07387996, posY = 1.34745741, posZ = 0.972107768, r00 = -0.892790675, r01 = -0.449979424, r02 = -0.021051202, r10 = -0.449911892, r11 = 0.893036127, r12 = -0.00810947269, r20 = 0.0224485807, r21 = 0.00223112362, r22 = -0.999745488}, -- [AUG]
+    top = {posX = -2.12617683, posY = -0.632455111, posZ = -0.240959287, r00 = 0.893063903, r01 = 0.449861199, r02 = -0.00786215067, r10 = -0.449917108, r11 = 0.893033862, r12 = -0.00806869194, r20 = 0.00339137577, r21 = 0.0107431728, r22 = 0.999936521}, -- [LMG]
+    back = {posX = -0.29586333, posY = 1.48937821, posZ = -0.83953464, r00 = 0.999956548, r01 = 0, r02 = 0.00932267774, r10 = 0, r11 = 1, r12 = 0, r20 = -0.00932267774, r21 = 0, r22 = 0.999956548}, -- [Flintlock]
+    right = {posX = -3.13991642, posY = -1.32983017, posZ = 1.03399849, r00 = -0.892001987, r01 = -0.449795008, r02 = -0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = 0.0437514111, r21 = 0.0129750315, r22 = -0.99895823}, -- [Rifle]
+    shoulder = {posX = 2.95100403, posY = 1.48889732, posZ = 0.0876422524, r00 = 0.999956548, r01 = 0, r02 = 0.00932267774, r10 = 0, r11 = 1, r12 = 0, r20 = -0.00932267774, r21 = 0, r22 = 0.999956548}, -- [Deagle]
+    hip = {posX = -1.21528339, posY = -0.776254892, posZ = -2.42920375, r00 = -0.0286964178, r01 = -0.00544241071, r02 = 0.99957335, r10 = -0.449941665, r11 = 0.893021643, r12 = -0.00805497169, r20 = -0.892596841, r21 = -0.449980855, r22 = -0.0280753374}, -- [Revolver]
+    front = {posX = 4.87040806, posY = 0.629776001, posZ = -0.288636208, r00 = 0.892001987, r01 = 0.449795008, r02 = 0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = -0.0437514111, r21 = -0.0129750315, r22 = 0.99895817}, -- [Double-Barrel SG]
+    extra1 = {posX = -0.234426722, posY = -3.9485147, posZ = 1.23447323, r00 = -0.892001987, r01 = -0.449795008, r02 = -0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = 0.0437514111, r21 = 0.0129750315, r22 = -0.99895823}, -- [Shotgun]
+    extra2 = {posX = -3.43440294, posY = -0.185738131, posZ = -0.78850174, r00 = 0.892001987, r01 = 0.449795008, r02 = 0.0449092388, r10 = -0.449909091, r11 = 0.893037558, r12 = -0.00810541213, r20 = -0.0437514111, r21 = -0.0129750315, r22 = 0.99895817}, -- [TacticalShotgun]
 }
 local function isDaHoodWeapon(tool)
     if not tool or not tool:IsA("Tool") then return false end
@@ -149,6 +156,11 @@ local function ensureOriginalGrip(tool)
 end
 local function applyOffset(tool)
     if not tool then return end
+    -- Force exact grip from your provided holding positions (when NOT in Da Hood mode)
+    if exactGripMap[tool.Name] and not daHoodEnabled then
+        tool.Grip = exactGripMap[tool.Name]
+        return
+    end
     -- HARD OVERRIDE FOR BOOMBOX — EXACTLY YOUR SCREENSHOT + Z=-2.65 + COLOR FIX
     if tool.Name == "Boombox" then
         tool.Grip = CFrame.new(-1.47619057, -0.297619045, -2.65, -0.936234891, -0.351374835, -4.37113883e-08, -0.351374835, 0.936234891, 0, -4.09241281e-08, -1.53590811e-08, 1)
@@ -672,21 +684,16 @@ local function assignDaHoodLayout()
     table.sort(found, function(a,b) return a.Name < b.Name end)
     local finalAssignments = {}
     local usedSlots = {}
-    for _, t in ipairs(found) do
-        if t.Name:lower():find("lmg") then
-            finalAssignments[t] = DAHOOD_SLOTS.top
-            usedSlots.top = true
-        end
-    end
-    for _, t in ipairs(found) do
-        if not finalAssignments[t] and t.Name:lower():find("flintlock") then
-            finalAssignments[t] = DAHOOD_SLOTS.back
-            usedSlots.back = true
-        end
-    end
+    -- Priority assignments using exact grips from your holding data
     for _, t in ipairs(found) do
         local nm = t.Name:lower()
-        if not finalAssignments[t] and nm:find("aug") then
+        if nm:find("lmg") then
+            finalAssignments[t] = DAHOOD_SLOTS.top
+            usedSlots.top = true
+        elseif nm:find("flintlock") then
+            finalAssignments[t] = DAHOOD_SLOTS.back
+            usedSlots.back = true
+        elseif nm:find("aug") then
             if not usedSlots.left then
                 finalAssignments[t] = DAHOOD_SLOTS.left
                 usedSlots.left = true
@@ -694,11 +701,7 @@ local function assignDaHoodLayout()
                 local adj = serializeCFrame(deserializeCFrame(DAHOOD_SLOTS.left) * CFrame.new(0, 0.15, -0.25))
                 finalAssignments[t] = adj
             end
-        end
-    end
-    for _, t in ipairs(found) do
-        local nm = t.Name:lower()
-        if not finalAssignments[t] and (nm:find("rifle") or nm:find("ak") or nm:find("m4") or nm:find("scar")) then
+        elseif nm:find("rifle") or nm:find("ak") or nm:find("m4") or nm:find("scar") then
             if not usedSlots.right then
                 finalAssignments[t] = DAHOOD_SLOTS.right
                 usedSlots.right = true
@@ -706,9 +709,34 @@ local function assignDaHoodLayout()
                 local adj = serializeCFrame(deserializeCFrame(DAHOOD_SLOTS.right) * CFrame.new(0, 0.15, 0.25))
                 finalAssignments[t] = adj
             end
+        elseif nm:find("deagle") then
+            if not usedSlots.shoulder then
+                finalAssignments[t] = DAHOOD_SLOTS.shoulder
+                usedSlots.shoulder = true
+            end
+        elseif nm:find("revolver") then
+            if not usedSlots.hip then
+                finalAssignments[t] = DAHOOD_SLOTS.hip
+                usedSlots.hip = true
+            end
+        elseif nm:find("double-barrel") then
+            if not usedSlots.front then
+                finalAssignments[t] = DAHOOD_SLOTS.front
+                usedSlots.front = true
+            end
+        elseif nm:find("shotgun") and not nm:find("double") then
+            if not usedSlots.extra1 then
+                finalAssignments[t] = DAHOOD_SLOTS.extra1
+                usedSlots.extra1 = true
+            end
+        elseif nm:find("tactical") then
+            if not usedSlots.extra2 then
+                finalAssignments[t] = DAHOOD_SLOTS.extra2
+                usedSlots.extra2 = true
+            end
         end
     end
-    local fallbackOrder = {"shoulder", "back", "top", "left", "right"}
+    local fallbackOrder = {"shoulder", "back", "top", "left", "right", "hip", "front", "extra1", "extra2"}
     for _, t in ipairs(found) do
         if not finalAssignments[t] then
             for _, slot in ipairs(fallbackOrder) do
